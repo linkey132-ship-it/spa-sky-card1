@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPA-SKY — Электронная визитка</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  min-height:100vh;
+  background:radial-gradient(ellipse at 60% 20%,#071f38 0%,#020c18 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans',sans-serif;
+  padding:2rem 1rem;
+}
+.card{
+  width:100%;max-width:480px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#020c18 0%,#041a2e 40%,#071f38 100%);
+  position:relative;overflow:hidden;
+  padding:2rem 2.2rem 1.8rem;
+  border:1px solid rgba(80,200,240,0.15);
+}
+.card::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 200px 120px at 80% 20%,rgba(0,180,230,.12) 0%,transparent 70%),
+    radial-gradient(ellipse 150px 100px at 10% 80%,rgba(0,120,200,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.wave{position:absolute;bottom:-20px;left:-10%;width:120%;height:90px;opacity:.12;animation:waveMove 7s ease-in-out infinite;}
+.wave2{bottom:-30px;animation:waveMove 10s ease-in-out infinite reverse;opacity:.07}
+@keyframes waveMove{0%,100%{transform:translateX(0) scaleY(1)}50%{transform:translateX(-3%) scaleY(1.1)}}
+.shimmer{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(105deg,transparent 40%,rgba(120,210,255,.06) 50%,transparent 60%);animation:shimmer 5s ease-in-out infinite;pointer-events:none}
+@keyframes shimmer{0%{left:-100%}100%{left:160%}}
+.bubbles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.bubble{position:absolute;border-radius:50%;border:1px solid rgba(100,210,255,.2);animation:rise linear infinite}
+@keyframes rise{0%{transform:translateY(110%) scale(.6);opacity:0}10%{opacity:1}90%{opacity:.5}100%{transform:translateY(-20%) scale(1);opacity:0}}
+.logo-area{display:flex;align-items:flex-start;gap:14px;margin-bottom:1.4rem}
+.logo-mark{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(80,200,240,.5);display:flex;align-items:center;justify-content:center;background:rgba(0,150,210,.1);flex-shrink:0}
+.brand-name{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;letter-spacing:.12em;color:#e8f6ff;line-height:1}
+.brand-sub{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:300;letter-spacing:.35em;color:rgba(100,190,230,.7);text-transform:uppercase;margin-top:5px}
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(80,200,240,.3),transparent);margin:0 0 1.3rem}
+.contacts{display:flex;flex-direction:column;gap:10px}
+.contact-item{display:flex;align-items:center;gap:12px;text-decoration:none;transition:transform .2s ease}
+.contact-item:hover{transform:translateX(4px)}
+.c-icon{width:30px;height:30px;border-radius:8px;background:rgba(0,150,220,.1);border:1px solid rgba(80,200,240,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.c-icon svg{width:14px;height:14px}
+.c-label{font-size:9px;font-weight:300;letter-spacing:.2em;color:rgba(100,180,220,.6);text-transform:uppercase;line-height:1;margin-bottom:2px}
+.c-value{font-size:13px;font-weight:400;color:rgba(220,240,255,.9);line-height:1}
+.contact-item:hover .c-value{color:#7dd4f8}
+.qr-section{margin-top:1.4rem;display:flex;align-items:center;gap:14px;border-top:1px solid rgba(80,200,240,.1);padding-top:1.2rem}
+.qr-img{width:72px;height:72px;border-radius:10px;border:1px solid rgba(80,200,240,.2);object-fit:cover}
+.qr-text{font-size:10px;color:rgba(100,180,220,.6);letter-spacing:.1em;line-height:1.6}
+.qr-text strong{display:block;font-size:11px;color:rgba(180,220,240,.7);font-weight:400;margin-bottom:3px;letter-spacing:.15em}
+.copy-hint{font-size:9px;color:rgba(80,180,230,.35);text-align:center;margin-top:1rem;letter-spacing:.15em}
+.copied-toast{position:absolute;top:14px;right:18px;background:rgba(0,180,230,.9);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;opacity:0;transform:translateY(-6px);transition:all .3s ease;pointer-events:none}
+.copied-toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="bubbles" id="bubbles"></div>
+  <div class="shimmer"></div>
+  <svg class="wave" viewBox="0 0 1200 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,40 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,90 L0,90 Z" fill="#40c0f0"/>
+  </svg>
+  <svg class="wave wave2" viewBox="0 0 1200 90" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,60 C300,10 600,80 900,20 C1050,0 1150,50 1200,40 L1200,90 L0,90 Z" fill="#20a0e0"/>
+  </svg>
+  <div class="copied-toast" id="toast">Скопировано</div>
+  <div class="logo-area">
+    <div class="logo-mark">
+      <svg viewBox="0 0 18 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:18px;height:22px">
+        <path d="M9 1 C9 1 2 9 2 14 C2 18.4 5.1 21 9 21 C12.9 21 16 18.4 16 14 C16 9 9 1 9 1Z" fill="rgba(0,180,240,.3)" stroke="rgba(80,200,255,.8)" stroke-width="1"/>
+        <path d="M6 15 C6 13 7.5 11.5 9 11" stroke="rgba(180,230,255,.5)" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">SPA·SKY</div>
+      <div class="brand-sub">Mineral Water · Production</div>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="contacts">
+    <a class="contact-item" href="https://www.spa-sky.com/" target="_blank">
+      <div class="c-icon">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8" cy="8" r="6.5" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+          <path d="M8 1.5 C8 1.5 5.5 5 5.5 8 C5.5 11 8 14.5 8 14.5" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+          <path d="M1.5 8 L14.5 8" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div><div class="c-label">Website</div><div class="c-value">spa-sky.com</div></div>
+    </a>
+    <a class="contact-item" href="mailto:spaskyproduction@gmail.com">
+      <div class="c-icon">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+          <path d="M1.5 5 L8 9.5 L14.5 5" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div><div class="c-label">Email</div><div class="c-value">spaskyproduction@gmail.com</div></div>
+    </a>
+    <div class="contact-item" style="cursor:pointer" onclick="copyText('+77715522869')">
+      <div class="c-icon">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 2.5 C3 2 3.5 1.5 4 1.5 L6 1.5 L7 5 L5.5 6 C6.2 7.8 8.2 9.8 10 10.5 L11 9 L14.5 10 L14.5 12 C14.5 12.5 14 13 13.5 13 C7 13 3 8 3 2.5Z" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div><div class="c-label">Phone</div><div class="c-value">+7 771 552-28-69</div></div>
+    </div>
+    <a class="contact-item" href="https://www.instagram.com/spa.sky.production" target="_blank">
+      <div class="c-icon">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="12" height="12" rx="3.5" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+          <circle cx="8" cy="8" r="3" stroke="rgba(80,200,240,.7)" stroke-width="1"/>
+          <circle cx="11.5" cy="4.5" r=".8" fill="rgba(80,200,240,.7)"/>
+        </svg>
+      </div>
+      <div><div class="c-label">Instagram</div><div class="c-value">@spa.sky.production</div></div>
+    </a>
+  </div>
+  <div class="qr-section">
+    <img class="qr-img" src="spa_sky_qr.png" alt="QR vCard">
+    <div class="qr-text">
+      <strong>Сканируй для контакта</strong>
+      Откроет карточку контакта<br>SPA-SKY в твоём телефоне
+    </div>
+  </div>
+  <div class="copy-hint">нажми на телефон чтобы скопировать</div>
+</div>
+<script>
+const card=document.getElementById('card');
+const toast=document.getElementById('toast');
+card.addEventListener('mousemove',e=>{
+  const r=card.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width-.5;
+  const y=(e.clientY-r.top)/r.height-.5;
+  card.style.transform=`rotateY(${x*8}deg) rotateX(${-y*6}deg)`;
+});
+card.addEventListener('mouseleave',()=>{card.style.transform='';});
+function copyText(t){
+  navigator.clipboard.writeText(t).then(()=>{
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),1800);
+  });
+}
+const bc=document.getElementById('bubbles');
+for(let i=0;i<12;i++){
+  const b=document.createElement('div');
+  b.className='bubble';
+  const s=4+Math.random()*12;
+  b.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*8}s;`;
+  bc.appendChild(b);
+}
+</script>
+</body>
+</html>
